@@ -1,0 +1,6 @@
+; $Id$
+name = ShrinkTheWeb Field
+description = Provides the ability to format a link as a ShrinkTheWeb thumbnail
+dependencies[] = link
+package = CCK
+core = 6.x

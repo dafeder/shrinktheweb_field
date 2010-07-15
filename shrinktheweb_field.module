@@ -1,0 +1,174 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * shrinktheweb Field allows links to web pages to be displayed as thumbnails
+ *
+ */
+
+/**
+ * Implements hook_menu()
+ *
+ */
+function shrinktheweb_field_menu() {
+  $items['admin/settings/shrinktheweb'] = array(
+    'title' => 'ShrinkTheWeb Account',
+    'description' => 'Details of your shrinktheweb Account.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('shrinktheweb_field_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * Our admin form
+ *
+ */
+function shrinktheweb_field_admin_settings() {
+  $form['shrinktheweb_account_code'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Your public access key'),
+    '#description' => t('The access key given to you by <a href="http://shrinktheweb.com">shrinktheweb.com</a> for access to web thumbnails.'),
+    '#default_value' => variable_get('shrinktheweb_account_code', ''),
+  );
+  $form['shrinktheweb_account_secret_code'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Your secret access key'),
+    '#description' => t('The secret key given to you by <a href="http://shrinktheweb.com">shrinktheweb.com</a> for access to web thumbnails.'),
+    '#default_value' => variable_get('shrinktheweb_account_secret_code', ''),
+  );
+  return system_settings_form($form);
+}
+
+/**
+ * Declare our theme functions
+ *
+ */
+function shrinktheweb_field_theme() {
+  $theme = array(
+    'shrinktheweb_field_formatter_micro' => array(
+      'arguments' => array('element' => NULL),
+      'function' => 'theme_shrinktheweb_field_formatter',
+    ),
+    'shrinktheweb_field_formatter_tiny' => array(
+      'arguments' => array('element' => NULL),
+      'function' => 'theme_shrinktheweb_field_formatter',
+    ),
+    'shrinktheweb_field_formatter_verysmall' => array(
+      'arguments' => array('element' => NULL),
+      'function' => 'theme_shrinktheweb_field_formatter',
+    ),
+    'shrinktheweb_field_formatter_small' => array(
+      'arguments' => array('element' => NULL),
+      'function' => 'theme_shrinktheweb_field_formatter',
+    ),
+    'shrinktheweb_field_formatter_large' => array(
+      'arguments' => array('element' => NULL),
+      'function' => 'theme_shrinktheweb_field_formatter',
+    ),
+    'shrinktheweb_field_formatter_xtralarge' => array(
+      'arguments' => array('element' => NULL),
+      'function' => 'theme_shrinktheweb_field_formatter',
+    ),
+  );
+  return $theme;
+}
+
+/**
+ * Declare our formatters
+ *
+ */
+function shrinktheweb_field_field_formatter_info() {
+  $formatters = array();
+  $formatters['micro'] = array(
+    'label' => t('shrinktheweb micro image'),
+    'field types' => array('link'),
+  );
+  $formatters['tiny'] = array(
+    'label' => t('shrinktheweb tiny image'),
+    'field types' => array('link'),
+  );
+  $formatters['verysmall'] = array(
+    'label' => t('shrinktheweb very small image'),
+    'field types' => array('link'),
+  );
+  $formatters['small'] = array(
+    'label' => t('shrinktheweb small image'),
+    'field types' => array('link'),
+  );
+  $formatters['large'] = array(
+    'label' => t('shrinktheweb large image'),
+    'field types' => array('link'),
+  );
+  $formatters['xtralarge'] = array(
+    'label' => t('shrinktheweb xtralarge image'),
+    'field types' => array('link'),
+  );
+  return $formatters;
+}
+
+/**
+ * Themeable function for field output
+ *
+ */
+function theme_shrinktheweb_field_formatter($element) {
+  if ($element['#item']['url']) {
+    return shrinktheweb_field_field_formatter($element['#field_name'], $element['#item'], $element['#formatter'], $element['#item']['url'], $element['#node']->title);
+  }
+}
+
+/**
+ * Implementation of hook_field_formatter().
+ */
+function shrinktheweb_field_field_formatter($field, $item, $formatter, $url, $title) {
+  switch ($formatter) {
+    default:
+    case 'micro':
+      $size = 'mcr';
+      $width = 75;
+      $height = 56;
+      break;
+    case 'tiny':
+      $size = 'tiny';
+      $width = 200;
+      $height = 150;
+      break;
+    case 'verysmall':
+      $size = 'vsm';
+      $width = 100;
+      $height = 75;
+      break;
+    case 'small':
+      $size = 'sm';
+      $width = 120;
+      $height = 90;
+      break;
+    case 'large':
+      $size = 'lg';
+      $width = 200;
+      $height = 150;
+      break;
+    case 'xtralarge':
+      $size = 'xlg';
+      $width = 320;
+      $height = 240;
+      break;
+  }
+  if (variable_get('shrinktheweb_account_code', '')) {
+    $shrinktheweb_url = 'http://images.shrinktheweb.com/xino.php?embed=1' .
+                        // '&stwu=' variable_get('shrinktheweb_account_secret_code', '') . 
+                        '&stwaccesskeyid='. variable_get('shrinktheweb_account_code', '') . 
+                        '&stwsize='. $size .'&stwurl='. _shrinktheweb_format_url($url);
+
+    $image = theme('image', $shrinktheweb_url, $title, $title, array('height' => $height, 'width' => $width), FALSE);
+    return l($image, $url, array('html' => TRUE, 'attributes' => $item['attributes']));
+  }
+}
+
+function _shrinktheweb_format_url($url) {
+  $parsed = parse_url($url);
+  return $parsed['host'];
+}
