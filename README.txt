@@ -13,7 +13,8 @@ For a full description of that module, visit the project page:
 
 -- REQUIREMENTS --
 
-None.
+* Link module (and, by extension, CCK)
+* ShrinkTheWeb account
 
 
 -- INSTALLATION --
